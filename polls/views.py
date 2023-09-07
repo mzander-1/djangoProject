@@ -1,13 +1,10 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.views import generic
 from django.utils import timezone
+from django.views import generic
 
 from .models import Question, Choice
-
-
-# Create your views here.
 
 
 class IndexView(generic.ListView):
@@ -22,14 +19,24 @@ class IndexView(generic.ListView):
         return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
 
 
-class DetailView(generic.DetailView):
+
+class QuestionDetailViewMixin():
     model = Question
     template_name = "polls/detail.html"
 
+
+
+
+class DetailView(QuestionDetailViewMixin, generic.DetailView):
     def get_queryset(self):
         """
         Excludes any questions that aren't published yet.
         """
+        return Question.objects.filter(pub_date__lte=timezone.now())
+
+class AnsweredQuestionDetailView(QuestionDetailViewMixin, generic.DetailView):
+
+    def get_queryset(self):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
 class ResultsView(generic.DetailView):
